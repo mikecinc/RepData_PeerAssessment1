@@ -1,21 +1,18 @@
----
-title: "PA1_template"
-author: "Mike Cincotti"
-date: "Monday, January 12, 2015"
-output:
-  html_document:
-    keep_md: yes
----
+# PA1_template
+Mike Cincotti  
+Monday, January 12, 2015  
 
 This is an R Markdown document analyzing the steps data within the Activity Monitoring Data. 
 
 First we need to read in the data:
-```{r}
+
+```r
 stepdata <- read.csv("Activity.csv")
 ```
 
 Now we want to look at some daily values. 
-```{r,warning=FALSE}
+
+```r
 library(plyr)
 stepsbyday <- ddply(stepdata, "date", summarise,steps=sum(steps))
 dailymean <- mean(stepsbyday$steps, na.rm=TRUE)
@@ -23,20 +20,26 @@ dailymedian <- median(stepsbyday$steps, na.rm=TRUE)
 hist(stepsbyday$steps,xlab="Daily Steps",main="Histogram of Daily Steps")
 ```
 
-The mean steps per day, excluding NA values, is `r dailymean`. The median steps per day, excluding NA values, is `r dailymedian`.
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+The mean steps per day, excluding NA values, is 1.0766189\times 10^{4}. The median steps per day, excluding NA values, is 10765.
 
 Now let's organize the data according to range and see which ranges had the most steps:
 
-```{r,warning=FALSE}
+
+```r
 stepsbyinterval <- ddply(stepdata, "interval", summarise,steps=mean(steps,na.rm=TRUE))
 highestinterval <- stepsbyinterval[which.max(stepsbyinterval$steps),1]
 plot(stepsbyinterval$interval,stepsbyinterval$steps,type="l",xlab="Interval",ylab="Steps",main="Steps By Interval")
 ```
 
-The interval with the most steps is `r highestinterval`.
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+The interval with the most steps is 835.
 
 Now we're going to deal with all of those NA values. Whenever there is a row with "NA", we're going to fill in the value with the step count with the mean value for that interval. Once we do that, we'll look at the same histogram from earlier with the new data set.
-```{r,warning=FALSE}
+
+```r
 filledsteps <- stepdata
 nacount <- sum(is.na(filledsteps$steps))
 for ( i in seq_along(filledsteps$steps)){
@@ -52,10 +55,13 @@ newdailymedian <- median(filledstepsdaily$steps, na.rm=TRUE)
 hist(filledstepsdaily$steps,xlab="Daily Steps",main="Histogram of Daily Steps")
 ```
 
-There were `r nacount` NA values in the original data. With the new data, the mean is `r newdailymean` (compared to `r dailymean` from above) and the median is `r newdailymedian` (compared to `r dailymedian` from above).
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+There were 2304 NA values in the original data. With the new data, the mean is 1.0765639\times 10^{4} (compared to 1.0766189\times 10^{4} from above) and the median is 1.0762\times 10^{4} (compared to 10765 from above).
 
 Now let's split the data between weekdays and weekends.
-```{r,warning=FALSE,message=FALSE}
+
+```r
 library(lubridate)
 isweekend <- function(x){
     thisdate <- ymd(as.character(x))
@@ -74,6 +80,13 @@ weekendsteps <- ddply(weekendsteps, "interval", summarise,steps=mean(steps,na.rm
 weekdaysteps <- subset(filledsteps,filledsteps[,4]=="weekday")
 weekdaysteps <- ddply(weekdaysteps, "interval", summarise,steps=mean(steps,na.rm=TRUE))
 plot(weekdaysteps$interval,weekdaysteps$steps,type="l",xlab="Interval",ylab="Steps",main="Weekday Steps By Interval")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+```r
 plot(weekendsteps$interval,weekendsteps$steps,type="l",xlab="Interval",ylab="Steps",main="Weekend Steps By Interval")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-2.png) 
 
